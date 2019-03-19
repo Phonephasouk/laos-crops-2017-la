@@ -1,0 +1,61 @@
+/* main.css: Add and override styles */
+
+html, body {
+    height:     100%;
+    width:      100%;
+    overflow-x: hidden;
+}
+
+.dc-chart g.row text {
+    fill: black;
+}
+
+.dc-data-count small {
+  font-size: 14px;
+}
+
+.container-fluid {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.pie-chart {
+  height: 150px;
+  
+}
+
+.dc-chart .axis text{
+  font-size: 12px;
+}
+
+
+
+text {
+  font-size: 12px;
+}
+
+#map {
+  height: 150px;
+}
+
+#control-row {
+  padding-bottom: 20px;
+}
+
+a { cursor: pointer }
+.hdx-3w-info {
+    margin-top: 10px !important;
+	margin-bottom: 10px;
+	max-width: 450px;
+    padding: 6px 8px;
+    font: 12px/14px Arial, Helvetica, sans-serif;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 7px;
+}
+
+.hdx-3w-info h4 {
+    margin: 0 0 5px;
+	color: #777;
+}

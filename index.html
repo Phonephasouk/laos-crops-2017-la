@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta content='width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0' name='viewport'>
+   
+    <title>Lao PDR Crop Statistics 2017 </title>
+    <meta charset="UTF-8">
+    
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.css" />
+    <link rel="stylesheet" href="docs/dc-leaflet-legend.css">
+    <link href="docs/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+	
+	<link rel="stylesheet" href="docs/dc.css">
+	<link rel="stylesheet" href="docs/dc-addons.css">
+	<link rel="stylesheet" href="docs/colorbrewer.css">
+	<link rel="stylesheet" href="docs/prettify.css">
+	
+    <script src="docs/d3.min.js"></script>
+    <script src="docs/crossfilter.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min.js"></script>
+    <script src="docs/dc.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.js"></script>
+    <script src="docs/dc-leaflet.js"></script>
+    <script src="docs/leaflet-providers.js"></script>
+    <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+	<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	
+	<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+	
+	<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" media="screen" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css"/>
+	<script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
+    <script src="docs/underscore-min.js"></script>
+	
+	
+</head>
+
+<body>
+
+<div class="container-fluid">	
+    <div class="row">        
+            <h3>ສປປ ລາວ: ສະຖິຕິພືດປີ 2017                
+            </h3>						
+    </div>
+		
+    <div class="row" id="control-row">
+        
+        <div class="col-xs-6">
+            <h4>ແຜນທີ່ການຜະລິດ
+			<small>
+				<a class="reset" style="visibility: showed;" href="javascript:usChartLeaflet.filterAll();dc.redrawAll();">reset</a>
+			</small>
+            </h4>
+            <div class="dc-chart" id="chart-leaflet" style="width:98%; height:590px;"></div>
+        </div>
+		
+        <div class="col-xs-3">
+			<div class="row">
+				<h4>ເລືອກຕົວຊີ້ວັດ							
+				</h4><br>
+					 
+				<div id="select-operation" > &nbsp; &nbsp; 
+					<label><input type=radio name="operation" id = "dOption1" value="1" checked="true">&nbsp;ເນື້ອທີ່ປູກ (ເຮັກຕາ)</label><br>&nbsp; &nbsp;  
+					<label><input type=radio name="operation" value="2">&nbsp;ເນື້ອທີ່ເກັບກູ້ (ເຮັກຕາ)</label><br>&nbsp; &nbsp; 
+					<label><input type=radio name="operation" value="3">&nbsp;ຜົນຜະລິດ (ໂຕນ)</label><br>
+				</div>
+	
+			</div>
+			<br>
+			<br>
+			<div class="row">
+				<h4>ອັດຕາສ່ວນການຜະລິດ  
+					<small><span id="chart-Pie">
+						<a class="reset" style="visibility: hidden;" href="javascript:PieChart.filterAll();dc.redrawAll();">reset</a>
+					</span>
+					</small>
+				</h4>	
+					<div class="dc-chart" id="chart-Pie" style="width:90px;" ></div>
+					<center><div class="dc-data-count dc-chart row" id="data-count" >
+						<h5> &nbsp; &nbsp;  ລວມ: <span class="filter-count"></span>
+						<small>
+							 | <a id="all" style="visibility: showed;" href="#">Reset All</a>  
+						</small>
+						</h5>
+					</div></center>
+						
+			</div>
+		</div>
+       
+		<div class="col-xs-3">
+            <h4>ປະລິມານການຜະລິດ
+                <small>
+					<span id="chart-CatID">
+						<a class="reset" style="visibility: hidden;" href="javascript:rowCatChart.filterAll();dc.redrawAll();">reset</a>
+						<div class="dc-chart" id="chart-CatID" style='height:580px;' ></div>
+						<!--div class="dc-chart" id="chart-CatID" style='overflow-y:scroll; height:600px;' ></div-->
+					</span>
+				</small>
+			</h4>
+        </div>	   
+	</div>			
+</div>
+
+
+<script type="text/javascript">
+	var jsonFile2 = "data/lao_all_crops_2017.json";
+	
+    d3.json(jsonFile2, function(error, data) {
+		
+		riceType = {
+		  1: "ກາເຟ",
+		  2: "ໝາກແໜ່ງ",
+		  3: "ຊາຕົ້ມນ້ຳ",
+		  4: "ສາລີແຂງ",
+		  5: "ສາລີຫວານ",
+		  6: "ຖົ່ວເຫຼືອງ",
+		  7: "ຖົ່ວຂຽວ",
+		  8: "ຖົ່ວດິນ",
+		  9: "ຖົ່ວດຳ",
+		  10: "ຢາສູບ",
+		  11: "ຝ້າຍ",
+		  12: "ອ້ອຍ",
+		  13: "ໝາກເດືອຍ",
+		  14: "ໝາກງາ",
+		  15: "ມັນຕົ້ນ",
+		  16: "ມັນດ້າງ",
+		  17: "ມັນຝຣັ່ງ",
+		  18: "ມັນເພົາ",
+		  19: "ເຜືອກ",
+		  20: "ຜັກລວມ",
+		  21: "ໄມ້ໃຫ້ໝາກຢືນຕົ້ນ",
+		  22: "ໝາກກ້ວຍ",
+		  23: "ໝາກນັດ",
+		  24: "ໝາກຫຸ່ງ",
+		  25: "ໝາກໂມ",
+		  26: "ໝາກແຕງຫວານ",
+		  27: "ໝາກນາວ",
+		  28: "ເຂົ້ານາປີ",
+		  29: "ເຂົ້ານາແຊງ",
+		  30: "ເຂົ້າໄຮ່"
+	
+		};
+		dataT = {
+		  1: "Planted area (ha)",
+		  2: "Harvested area (ha)",
+		  3: "Production (tonnes)"
+		};
+        var AutoData = data.autos;
+
+        // normalize/parse data so dc can correctly sort & bin them
+        $.each(AutoData, function(d){
+            d.pvalue = +d.pvalue;
+        });
+		
+
+        // set crossfilter
+        var ndx = crossfilter(AutoData);
+
+        // create dimensions (x-axis values)
+		var PcodeDim = ndx.dimension(dc.pluck('pcode'));
+		//var testDim = ndx.dimension(dc.pluck('province'));
+        var CatDim = ndx.dimension(function(d, i){return riceType[d.catid];});
+        var GroupDim = ndx.dimension(function(d, i){return dataT[d.groupid];});
+        var CatIDDim = ndx.dimension(dc.pluck('catid'));
+		
+        
+		//var countSum = AutoData.map(function(d) { return d.pvalue; })
+                                   // .reduce(function(sum, value) { return sum + value; }, 0 );
+		//var counttestDim = testDim.group().reduceSum(function(d){return d.pvalue});
+        var all = ndx.groupAll().reduceSum(function(d){return d.pvalue;});
+        var countPerCat = CatDim.group().reduceSum(function(d){return d.pvalue;});
+        var countPerGroup = GroupDim.group().reduceSum(function(d){return d.pvalue;});
+        var countPerCatID = CatIDDim.group().reduceSum(function(d){return d.pvalue;});
+        var countPerPcode = PcodeDim.group().reduceSum(function(d){return d.pvalue});
+
+        // specify charts        
+        GroupHChart = dc.rowChart('#chart-GroupH');
+        PieChart = dc.pieChart('#chart-Pie');
+        dataCount = dc.dataCount('#data-count');
+        geoChoroChart = dc.geoChoroplethChart("#chart-Wohnviertel");
+        usChartLeaflet = dc.leafletChoroplethChart("#chart-leaflet");
+		rowCatChart = dc.rowChart('#chart-CatID');
+
+		function roundUp(value) {
+			if(value > 1000){
+				return (~~((value + 999) / 1000) * 1000);
+				
+			} else 	{	
+				return value;
+			}
+		}
+		rowCatChart
+			.height(580) //optional
+			.width(210)
+			.dimension(CatDim)
+			.group(countPerCat)
+			.controlsUseVisibility(true)
+			.ordering(function(AutoData) {return -AutoData.value })
+			//.cap(20) //collapse into "other"
+			.margins({top: 10, right: 30, bottom: -1, left: 30}) // 30 by default
+			//.ordinalColors(['#3182bd'])
+			//.label(function(d){return d.key + ':   ' + d.value})
+			.title(function(d){return d.value.toLocaleString()})
+			.renderTitleLabel(true)
+			//.titleLabelOffsetX(260) //todo: use chartwidth, as e.g. here: https://github.com/dc-js/dc.js/blob/master/web/docs/api-latest.md#dc.rowChart+fixedBarHeight
+			.elasticX(true)
+			.ordinalColors(['#3182bd'])
+			.xAxis().ticks(0);
+			;
+		
+      
+        GroupHChart
+			.height(200)
+			.dimension(GroupDim)
+			.group(countPerGroup)
+			.ordering(function(AutoData) { return -AutoData.value })
+			.margins({top: 30, right: 30, bottom: -1, left: 30}) // 30 by default
+			.title(function(d){return d.value.toLocaleString()})
+			.renderTitleLabel(true)
+			//.titleLabelOffsetX(260)
+			.elasticX(true)
+			.ordinalColors(['#3182bd'])
+			.xAxis().ticks(0)	
+			;
+			
+		GroupHChart.addFilterHandler(function (filters, filter) {
+			filters.length = 0; // empty the array
+			filters.push(filter);
+			return filters;
+		});
+		
+		GroupHChart.filter([['Planted area (ha)']]);			
+								
+		PieChart
+			.width(220)			
+			.height(340)			
+			.dimension(CatIDDim)
+			.group(countPerCatID)			
+			//.label(function(d) { if ((d.value / all.value()) >=1){
+			//			return d.value.toLocaleString();}
+			//			else {return ((d.value / all.value()) * 100).toFixed(1) + '%';};})	
+			.label(function(d) {return ((d.value / all.value()) * 100).toFixed(1) + '%';})	
+			.title(function(d) { return riceType[d.key] + ': ' + ((d.value / all.value()) * 100).toFixed(1) + '%'; })
+			//.legend(dc.legend().x(10).y(Math.round(PieChart.height() * 0.15 , 1)).itemHeight(15).gap(Math.round(PieChart.height() * 0.02 , 1)).autoItemWidth(true).legendText(function (d) {
+				//	return riceType[d.name];   }))
+			.innerRadius(30)
+			.controlsUseVisibility(true)
+			.ordering(function(AutoData) {return -AutoData.value })
+			;
+		
+		window.onresize = function(event) {
+			if (window.innerWidth >700)
+			  {var newWidth = window.innerWidth*0.17;
+			  var newHeight = window.innerHeight*0.24;}
+			  else {var newWidth = 250;var newWidth = 340;
+			  };
+			  
+			  PieChart.width(newWidth)
+			  PieChart.height(newHeight)	
+			  
+			  dc.renderAll();
+			
+		};
+		
+	    dataCount
+			.controlsUseVisibility(true)
+			.dimension(ndx)
+			.group(all);
+		var jsonFile1 = "data/province_pov.json";
+        d3.json(jsonFile1, function (ProvinceJson) {
+            var locJSON = ProvinceJson;
+            var width = 600,
+            height = 400;
+            var projection = d3.geo.mercator()
+            .scale(1)
+            .translate([0, 0]);
+            var path = d3.geo.path()
+            .projection(projection);
+            var b = path.bounds(locJSON),
+            s = .95 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
+            t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2];
+
+            projection.scale(s).translate(t);
+
+            geoChoroChart
+				.dimension(PcodeDim)
+				.group(countPerPcode)			   
+				.overlayGeoJson(ProvinceJson.features, "PCode", function (d) {
+					return d.properties.Province;
+				})
+				;
+			
+            usChartLeaflet			
+				.width(420)
+				.height(590)
+				.center([18.16, 103.87])
+				.zoom(6)
+				.dimension(PcodeDim)
+				.group(countPerPcode)
+				.controlsUseVisibility(true)
+				.geojson(ProvinceJson.features)
+				.featureKeyAccessor(function(feature) {
+					return feature.properties.PCode;
+				})
+				.brushOn(true)
+				.legend(dc.leafletLegend().position("bottomright"))	
+			  
+				.linearColors(['#c6dbef', '#3182bd'])
+				.colorCalculator(function (d) { return d ? usChartLeaflet.colors()(d.value) : '#ccc'; })				
+				.colorDomain([
+					roundUp(d3.min(countPerPcode.all(), dc.pluck('value'))),
+					roundUp(d3.max(countPerPcode.all(), dc.pluck('value')))
+				])	
+				;
+			usChartLeaflet.on("preRender", function(chart) {
+			chart.colorDomain(d3.extent(chart.group().all(),
+										chart.valueAccessor()));
+			});
+
+			usChartLeaflet.on("preRedraw", function(chart) {
+			//save initial eventRange upon page load
+
+				eventRange = d3.extent(chart.group().all(), chart.valueAccessor());
+				eventRange[0] = roundUp(d3.min(countPerPcode.all(), dc.pluck('value')));
+				eventRange[1] = roundUp(d3.max(countPerPcode.all(), dc.pluck('value')));        
+
+				chart.colorDomain(eventRange);
+			});
+
+			//function filterJSON(json, key, value) {
+			//	var result = [];
+			//	json.forEach(function(val,idx,arr){
+			//		if(val[key] == value){
+			//		result.push(val)
+			//		}
+			//	})
+			//	return result;
+			//}
+	
+	
+            // register handlers
+            d3.selectAll('a#all').on('click', function () {
+                
+				dc.filterAll();
+				GroupHChart.filter([['Planted area (ha)']]);
+				document.getElementById("dOption1").checked = true;
+                dc.redrawAll();
+                /* Leaflet Map throws exception if renderAll() is used */
+                //dc.renderAll();
+            });
+            d3.selectAll('a#chart-CatID').on('click', function () {
+                rowCatChart.filterAll();
+                dc.redrawAll();
+            });
+            
+            d3.selectAll('a#chart-GroupH').on('click', function () {
+				GroupHChart.filterAll();
+                GroupHChart.filter([['Planted area (ha)']]);		
+                dc.redrawAll();
+            });
+            d3.selectAll('a#chart-Pie').on('click', function () {
+                PieChart.filterAll();
+                dc.redrawAll();
+            });
+           
+            d3.selectAll('a#chart-leaflet').on('click', function () {
+                usChartLeaflet.filterAll();
+                dc.redrawAll();
+            });
+			
+			$(function() {
+				$('input:radio[name="operation"]').change(function() {
+					if ($(this).val() == 1) {
+						GroupHChart.filter([['Planted area (ha)']]);
+						
+					} else if($(this).val() == 2) {						
+						GroupHChart.filter([['Harvested area (ha)']]);
+						
+					} else {						
+						GroupHChart.filter([['Production (tonnes)']]);
+						
+					}					
+					dc.redrawAll();
+				});
+			});
+
+            // showtime!
+            dc.renderAll();					
+            console.log(dc.version);
+        });
+    });
+
+</script>
+<script src="docs/bootstrap.js"></script>
+</body>
+</html>
